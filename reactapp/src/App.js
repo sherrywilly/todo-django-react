@@ -1,21 +1,7 @@
 import React, { Component } from 'react';
 import './App.css';
 import CustomModel from './Modal' ;
-
-const tasks = [
-  {
-    "id": 1,
-    "title": "shopping at evening",
-    "description": "need to buy some candles",
-    "completed": true
-  },
-  {
-    "id": 2,
-    "title": "shopping at morning",
-    "description": "buy some wine",
-    "completed": false
-  }
-]
+import axios from 'axios';
 
 class App extends Component {
   constructor(props) {
@@ -28,9 +14,19 @@ class App extends Component {
         description: "",
         completed: false
       },
-      taskList: tasks,
+      taskList: [],
     };
   }
+componentDidMount(){
+  this.refreshList();
+}
+
+refreshList = ()=>{
+  axios.get('http://localhost:8000/api/')
+  .then(res=>this.setState({taskList:res.data}))
+  .catch(error=>console.log(error));
+};
+
   displayCompleted = status => {
     if (status) {
       return this.setState({ viewCompleted: true });
@@ -59,8 +55,8 @@ class App extends Component {
           {item.title}
         </span>
         <span>
-          <button className="btn btn-info m-2 text-light">Edit</button>
-          <button className="btn btn-danger m-2">Delete</button>
+          <button className="btn btn-info m-2 text-light" onClick={() => this.editItem(item)}>Edit</button>
+          <button className="btn btn-danger m-2" onClick = {()=>this.handleDelete(item)}>Delete</button>
         </span>
       </li>
     ))
@@ -70,11 +66,22 @@ class App extends Component {
   };
   handleSubmit = item => {
     this.toggle();
-    alert("saved" + JSON.stringify(item));
+    // alert("saved" + JSON.stringify(item));
+    if (item.id){
+      axios.put(`http://localhost:8000/api/${item.id}/`,item)
+      .then(res=>this.refreshList());
+      return;
+    }
+    axios
+    .post("http://localhost:8000/api/", item)
+    .then(res => this.refreshList());
+    
   }
   handleDelete = item => {
 
-    alert("saved" + JSON.stringify(item));
+    axios
+    .delete(`http://localhost:8000/api/${item.id}/`)
+    .then(res => this.refreshList());
   }
 
   createItem = ()=>{
@@ -93,7 +100,7 @@ class App extends Component {
             <div className="col-md-6 col-sm-10 mx-auto p-0">
               <div className="card p-3">
                 <div>
-                  <button className="btn btn-warning text-dark" onClick={()=>this.toggle()}>Add Task</button>
+                  <button className="btn btn-warning text-dark" onClick={()=>this.createItem()}>Add Task</button>
                 </div>
                 {this.renderTabList()}
                 <ul className="list-group list-group-flush">

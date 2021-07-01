@@ -12,8 +12,8 @@ export default class CustomModel extends Component {
         if (e.target.type === "check-box") {
             value = e.target.checked;
         }
-        const activItem = { ...this.state.activeItem, [name]: value }
-        this.setState({ activItem })
+        const activeItem = { ...this.state.activeItem, [name]: value }
+        this.setState({ activeItem })
     }
     render() {
         const { toggle, onSave } = this.props;
